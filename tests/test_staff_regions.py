@@ -1,6 +1,7 @@
 import unittest
 
 from homr.model import MultiStaff, Staff, StaffPoint
+from homr.staff_parsing import _calculate_region
 from homr.staff_regions import StaffRegions
 
 
@@ -54,3 +55,14 @@ class TestStaffRegions(unittest.TestCase):
         self.assertEqual(100, regions.get_start_of_closest_staff_below(99))
         self.assertEqual(700, regions.get_start_of_closest_staff_below(600))
         self.assertEqual(1e12, regions.get_start_of_closest_staff_below(800))
+
+    def test_region_of_a_staff_beside_another_is_not_upside_down(self) -> None:
+        # Two staffs side by side at about the same height, as found on a page turned by 90°:
+        # the left one counts as both the staff above and the staff below the right one
+        left = build_staff(337, 497)
+        right = build_staff(352, 460)
+        regions = StaffRegions(
+            [MultiStaff([build_staff(208, 316), left], []), MultiStaff([right], [])]
+        )
+        region = _calculate_region(right, regions)
+        self.assertEqual([352 - 4 * 27, 460 + 4 * 27], [region[1], region[3]])

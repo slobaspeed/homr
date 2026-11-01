@@ -119,6 +119,11 @@ def _calculate_region(staff: Staff, regions: StaffRegions) -> NDArray:
         staff.max_y + 4 * staff.average_unit_size,
         regions.get_start_of_closest_staff_below(staff.max_y),
     )
+    if y_max <= y_min:
+        # A staff beside this one (e.g. on a page turned by 90°) counted as both the staff
+        # above and the staff below, which turns the region upside down
+        y_min = staff.min_y - 4 * staff.average_unit_size
+        y_max = staff.max_y + 4 * staff.average_unit_size
     return np.array([int(x_min), int(y_min), int(x_max), int(y_max)])
 
 
